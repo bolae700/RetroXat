@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NEON MUSIC PLAYER PRO</title>
+<meta name="description" content="A sleek cyberpunk retro neon audio player with authentic Hi-Fi spectrum visualizer, HD audio playback, and custom playlist controls." />
+<meta property="og:title" content="NEON MUSIC PLAYER PRO" />
+<meta property="og:description" content="A sleek cyberpunk retro neon audio player with authentic Hi-Fi spectrum visualizer, HD audio playback, and custom playlist controls." />
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --main-color: #00ff88;
+  --bg-color: #000000;
+  --secondary-color: rgba(0, 255, 136, 0.15);
+  --terminal-font: 'Orbitron', monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.retro-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+body {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="10" viewBox="0 0 8 10"><path fill="%2300ff88" d="M0 0L8 5L0 10Z"/></svg>') 2 5, auto;
+  background-color: #010402;
+  background-image: 
+    linear-gradient(rgba(0, 255, 136, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px, 32px 32px;
+  background-position: center center, center center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  font-family: var(--terminal-font);
+  user-select: none;
+  overflow-x: hidden;
+  padding: 12px;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.18) 0px, rgba(0, 0, 0, 0.18) 1px, transparent 1px, transparent 3px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.container {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 2;
+}
+
+.player-container {
+  width: 100%;
+  max-width: 100%;
+  min-height: 180px;
+  background: #010803;
+  border: 1px solid var(--main-color);
+  position: relative;
+  overflow: hidden;
+  border-radius: 0px;
+}
+
+.visual-display {
+  height: 108px;
+  background: #000c05;
+  position: relative;
+  border-bottom: 1px solid var(--main-color);
+  overflow: hidden;
+  border-radius: 0px;
+}
+
+#visualizer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.datetime-container {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  width: 105px;
+  color: var(--main-color);
+  font-size: 10.5px;
+  text-align: center;
+  z-index: 3;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  background: #001205;
+  padding: 3px 6px;
+  border-radius: 0px;
+  border: 1px solid var(--main-color);
+}
+
+.datetime-container div {
+  margin-bottom: 1px;
+}
+
+.user-signature {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  width: 105px;
+  color: var(--main-color);
+  font-size: 10.5px;
+  text-align: center;
+  z-index: 3;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  background: #001205;
+  padding: 4px 6px;
+  border-radius: 0px;
+  border: 1px solid var(--main-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metadata {
+  position: absolute;
+  bottom: 6px;
+  left: 8px;
+  right: 121px;
+  max-width: calc(100% - 129px);
+  color: var(--main-color);
+  font-size: 11.5px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 3;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  background: #001205;
+  border: 1px solid var(--main-color);
+  padding: 4px 8px;
+  border-radius: 0px;
+}
+
+.track-music-badge {
+  display: inline-block;
+  color: var(--main-color);
+  font-size: 13px;
+  margin-left: 6px;
+  vertical-align: middle;
+  pointer-events: none;
+  user-select: none;
+  cursor: default;
+  opacity: 0.95;
+}
+
+.progress-container {
+  height: 5px;
+  background: #001205;
+  margin: 3px 10px;
+  position: relative;
+  cursor: pointer;
+  border-radius: 0px;
+  border: 1px solid var(--main-color);
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--main-color);
+  transition: width 0.1s linear;
+  position: relative;
+  border-radius: 0px;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 9px;
+  border-radius: 0px;
+  background: #ffffff;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.progress-container:hover .progress-bar::after {
+  opacity: 1;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 8px 10px;
+  position: relative;
+  z-index: 2;
+}
+
+.retro-btn {
+  background: #001400;
+  border: 1px solid var(--main-color);
+  color: var(--main-color);
+  padding: 8px 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.1s;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 800;
+  letter-spacing: 0.9px;
+  font-family: var(--terminal-font);
+  border-radius: 0px;
+}
+
+.retro-btn:hover {
+  background: var(--main-color);
+  color: #000;
+}
+
+.retro-btn:active {
+  transform: scale(0.98);
+}
+
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  margin-top: 2px;
+}
+
+.volume-control input {
+  flex: 1;
+  height: 4px;
+  background: #001205;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0px;
+  border: 1px solid var(--main-color);
+}
+
+.volume-control input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 6px;
+  height: 12px;
+  border-radius: 0px;
+  background: var(--main-color);
+  cursor: pointer;
+}
+
+.volume-control span {
+  font-size: 11px;
+  color: var(--main-color);
+  min-width: 34px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+}
+
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 10px;
+  color: var(--main-color);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  border-top: 1px solid var(--main-color);
+  margin-top: 3px;
+}
+
+.loading-dot {
+  display: inline-block;
+  animation: dotPulse 1.4s infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+@keyframes btnPulse {
+  0%, 100% { border-color: var(--main-color); }
+  50% { border-color: rgba(0, 255, 136, 0.4); }
+}
+
+.pulsing {
+  animation: btnPulse 2s infinite;
+}
+
+/* قائمة التشغيل */
+.playlist-container {
+  width: 100%;
+  max-width: 100%;
+  height: 130px;
+  background: var(--bg-color);
+  border: 1px solid var(--main-color);
+  margin: 4px 0;
+  overflow: hidden;
+  border-radius: 0px;
+}
+
+.playlist-header {
+  padding: 6px 10px;
+  background: #001400;
+  border-bottom: 1px solid var(--main-color);
+  font-size: 12px;
+  color: var(--main-color);
+  text-align: center;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 800;
+  letter-spacing: 0.9px;
+}
+
+.playlist-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.playlist-controls button {
+  background: transparent;
+  border: 1px solid var(--main-color);
+  color: var(--main-color);
+  cursor: pointer;
+  font-size: 10px;
+  padding: 3px 8px;
+  transition: all 0.1s;
+  font-weight: 800;
+  font-family: inherit;
+  border-radius: 0px;
+}
+
+.playlist-controls button:hover {
+  background: var(--main-color);
+  color: #000;
+}
+
+.playlist-items {
+  height: calc(100% - 30px);
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.playlist-item {
+  padding: 6px 8px;
+  font-size: 12px;
+  color: var(--main-color);
+  cursor: pointer;
+  transition: all 0.1s;
+  margin: 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  border-radius: 0px;
+  border-left: 2px solid transparent;
+}
+
+.playlist-item::before {
+  content: '▶';
+  margin-right: 7px;
+  font-size: 9px;
+  opacity: 0.8;
+}
+
+.playlist-item:hover {
+  background: rgba(0, 255, 136, 0.15);
+  padding-left: 12px;
+  border-left-color: var(--main-color);
+}
+
+.playlist-item.active {
+  background: var(--main-color);
+  color: #000;
+  font-weight: 900;
+  border-left-color: #000;
+}
+
+.playlist-item.active::before {
+  content: '⏸';
+  opacity: 1;
+}
+
+.playlist-items::-webkit-scrollbar {
+  width: 4px;
+}
+
+.playlist-items::-webkit-scrollbar-track {
+  background: #000;
+}
+
+.playlist-items::-webkit-scrollbar-thumb {
+  background: var(--main-color);
+}
+
+.notification-container {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 250px;
+}
+
+.notification {
+  background: #001205;
+  border: 1px solid var(--main-color);
+  color: var(--main-color);
+  padding: 7px 12px;
+  font-size: 11px;
+  font-weight: 800;
+  animation: slideInRight 0.3s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 0px;
+}
+
+.notification.error {
+  border-color: #ff4444;
+  color: #ff4444;
+}
+
+.notification.success {
+  border-color: #00ff88;
+  color: #00ff88;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+@media (max-width: 480px) {
+  .container {
+    max-width: 360px;
+  }
+  
+  .player-container {
+    min-height: 170px;
+  }
+  
+  .retro-btn {
+    font-size: 11px;
+    padding: 7px 4px;
+  }
+  
+  .metadata {
+    font-size: 12px;
+  }
+  
+  .playlist-container {
+    height: 120px;
+  }
+  
+  .playlist-item {
+    font-size: 11px;
+  }
+}
+</style>
+</head>
+<body>
+<canvas class="retro-canvas" id="retroCanvas"></canvas>
+
+<div class="notification-container" id="notificationContainer"></div>
+
+<div class="container">
+  <div class="player-container">
+    <div class="visual-display">
+      <canvas id="visualizer"></canvas>
+      
+      <div class="metadata">
+        <div id="track-title">NEON MUSIC PLAYER PRO <span class="track-music-badge" id="track-music-badge">♪</span></div>
+        <div id="time-display">00:00 / 00:00</div>
+      </div>
+      <div class="datetime-container">
+        <div id="current-date">--/--/----</div>
+        <div id="current-time">--:--:--</div>
+      </div>
+      <div class="user-signature" id="user-signature">POLA EMAD</div>
+    </div>
+
+    <div class="progress-container" id="progress-container">
+      <div class="progress-bar" id="progress"></div>
+    </div>
+
+    <!-- أزرار التحكم الثلاثة الأساسية المتناسقة -->
+    <div class="controls">
+      <button class="retro-btn" data-action="prev" title="Previous Track (Left Arrow)">⏮ PREV</button>
+      <button class="retro-btn pulsing" data-action="play" id="play-btn" title="Play / Pause (Space)">▶ PLAY</button>
+      <button class="retro-btn" data-action="next" title="Next Track (Right Arrow)">NEXT ⏭</button>
+    </div>
+
+    <div class="volume-control">
+      <span id="vol-label" style="cursor:pointer;" title="Click to mute">VOL:</span>
+      <input type="range" id="volume-slider" min="0" max="100" value="80" title="Volume Slider">
+      <span id="volume">80%</span>
+    </div>
+
+    <div class="status-bar">
+      <span>HD AUDIO STEREO</span>
+    </div>
+  </div>
+
+  <div class="playlist-container">
+    <div class="playlist-header">
+      <span>PLAYLIST - TRACKS (<span id="tracks-count">4</span>)</span>
+      <div class="playlist-controls">
+        <button id="playlist-prev" title="Scroll Up">▲</button>
+        <button id="playlist-next" title="Scroll Down">▼</button>
+      </div>
+    </div>
+    <div class="playlist-items" id="playlist-items"></div>
+  </div>
+</div>
+
+<script>
+// ========== نظام الإشعارات ==========
+function showNotification(message, type = 'info', duration = 2500) {
+  const container = document.getElementById('notificationContainer');
+  if (!container) return;
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+  container.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.style.animation = 'slideOutRight 0.3s ease-in';
+    setTimeout(() => notification.remove(), 280);
+  }, duration);
+}
+
+// ========== نظام المفضلة ==========
+const Favorites = {
+  list: [],
+  init() {
+    try {
+      const saved = localStorage.getItem('neonPlayerFavorites');
+      if (saved) this.list = JSON.parse(saved);
+    } catch(e) {}
+  },
+  toggle(index) {
+    const idx = this.list.indexOf(index);
+    let isFav = false;
+    if (idx > -1) {
+      this.list.splice(idx, 1);
+      showNotification('Removed from favorites', 'info');
+    } else {
+      this.list.push(index);
+      isFav = true;
+      showNotification('Added to favorites ★', 'success');
+    }
+    try {
+      localStorage.setItem('neonPlayerFavorites', JSON.stringify(this.list));
+    } catch(e) {}
+    return isFav;
+  },
+  isFavorite(index) {
+    return this.list.includes(index);
+  }
+};
+Favorites.init();
+
+// =========================================================================
+// قائمة المسارات الصوتية (يمكنك إضافة أو تعديل روابط الأغاني هنا في الكود مباشرة)
+// Audio Tracks (Add or edit song URLs directly here inside the code)
+// =========================================================================
+const tracks = [
+  { url: "https://audio.jukehost.co.uk/PfKhsur2uiLt7EQxCUvi5ua4L9mvdSMZ", title: "Phoenix Rise" },
+  { url: "https://audio.jukehost.co.uk/G7zG42txvFkuCgnHniwgLUr5Ew1KkRoZ", title: "Phoenix Rise V.2" },
+  { url: "https://audio.jukehost.co.uk/tvrLT8wxCuZZ2KujgLc1gJP3LWSMKUk5", title: "Nomad Heart" },
+  { url: "https://audio.jukehost.co.uk/NA2L6tnU8motxKNbwemTTSLU8zY5JcIJ", title: "Nomad Heart V.2" }
+];
+
+let currentTrackIndex = 0;
+let isPlaying = false;
+let isMuted = false;
+let previousVolume = 80;
+let isDraggingProgress = false;
+
+// مرجع الصوت و Web Audio API
+const audio = new Audio();
+audio.crossOrigin = "anonymous";
+audio.preload = "metadata";
+
+let audioContext = null;
+let analyser = null;
+let sourceNode = null;
+let visualizerAnimationId = null;
+
+// ========== نظام المرئيات الصوتية الحاد والنقي (Needle-Sharp Equalizer) ==========
+const NUM_BARS = 14;
+const TOTAL_SEGMENTS = 7;
+const barPeaks = new Array(NUM_BARS).fill(0);
+const barPeakHold = new Array(NUM_BARS).fill(0);
+
+function drawRetroVisualizer() {
+  visualizerAnimationId = requestAnimationFrame(drawRetroVisualizer);
+  
+  const canvas = document.getElementById('visualizer');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  if (!w || !h) return;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // حجز مساحة الجانب الأيمن المخصصة للتاريخ والوقت واسم المستخدم
+  const rightReserved = 124;
+  const maxAvailableW = Math.max(80, w - rightReserved - 10);
+
+  // 1. شبكة خلفية الشاشة الحادة والرفيعة كسن الإبرة (بدون أي توهج)
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0, 255, 136, 0.07)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([2, 4]);
+
+  const gridRight = maxAvailableW + 4;
+  for (let y = 14; y < h - 38; y += 15) {
+    ctx.beginPath();
+    ctx.moveTo(8, y);
+    ctx.lineTo(gridRight, y);
+    ctx.stroke();
+  }
+
+  // خطوط عمودية خفيفة
+  const numGridCols = 4;
+  const colStep = (gridRight - 16) / numGridCols;
+  for (let c = 1; c < numGridCols; c++) {
+    const x = 8 + c * colStep;
+    ctx.beginPath();
+    ctx.moveTo(x, 8);
+    ctx.lineTo(x, h - 38);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // فحص وضع السكوت أو الإيقاف (Silent / Standby / Paused / Muted)
+  const isSilent = !isPlaying || audio.paused || audio.volume === 0 || isMuted;
+
+  // استخراج بيانات الترددات الحقيقية
+  let bufferLength = 0;
+  let freqData = null;
+  if (analyser && !isSilent) {
+    bufferLength = analyser.frequencyBinCount;
+    freqData = new Uint8Array(bufferLength);
+    analyser.getByteFrequencyData(freqData);
+  }
+
+  // ========== معادل الترددات الحاد والمحدد (لا يتداخل مع التاريخ والاسم) ==========
+  const marginX = 10;
+  const barGap = 3;
+  const barW = Math.max(5, Math.floor((maxAvailableW - marginX - (NUM_BARS - 1) * barGap) / NUM_BARS));
+  const startX = marginX + Math.floor((maxAvailableW - marginX - (NUM_BARS * barW + (NUM_BARS - 1) * barGap)) / 2);
+  
+  const segmentH = 3.2;
+  const segmentGap = 1.6;
+  const bottomY = Math.floor(h - 38);
+
+  for (let i = 0; i < NUM_BARS; i++) {
+    const x = startX + i * (barW + barGap);
+    
+    let litCount = 0;
+    if (!isSilent && freqData) {
+      // توزيع لوغاريتمي حاد لترددات الموسيقى
+      const freqIdx = Math.min(bufferLength - 1, Math.floor(Math.pow(i / (NUM_BARS - 1), 1.25) * (bufferLength * 0.70)));
+      const val = (freqData[freqIdx] || 0) / 255;
+      litCount = Math.round(val * TOTAL_SEGMENTS);
+
+      // فيزياء القمم العائمة الكلاسيكية الحادة (Peak Hold)
+      if (litCount >= barPeaks[i]) {
+        barPeaks[i] = litCount;
+        barPeakHold[i] = 16;
+      } else if (barPeakHold[i] > 0) {
+        barPeakHold[i]--;
+      } else {
+        barPeaks[i] = Math.max(0, barPeaks[i] - 0.25);
+      }
+    } else {
+      barPeaks[i] = 0;
+      barPeakHold[i] = 0;
+    }
+
+    // رسم قطاعات الـ LED الحادة والرفيعة تماماً كسن الإبرة وبدون أي glow
+    for (let s = 0; s < TOTAL_SEGMENTS; s++) {
+      const segY = bottomY - (s + 1) * (segmentH + segmentGap);
+
+      if (s < litCount) {
+        // قطاع مضيء حاد بدون أي shadow أو blur
+        ctx.fillStyle = s >= TOTAL_SEGMENTS - 2 ? '#ffffff' : '#00ff88';
+        ctx.fillRect(x, segY, barW, segmentH);
+      } else if (isSilent && s === 0) {
+        // قطاع القاعدة في وضع السكون
+        ctx.fillStyle = 'rgba(0, 255, 136, 0.22)';
+        ctx.fillRect(x, segY, barW, segmentH);
+      } else {
+        // قطاع غير مضيء
+        ctx.fillStyle = 'rgba(0, 255, 136, 0.05)';
+        ctx.fillRect(x, segY, barW, segmentH);
+      }
+    }
+
+    // رسم القمة العائمة البيضاء الناصعة الحادة (بدون glow)
+    if (!isSilent && barPeaks[i] > 1) {
+      const peakIdx = Math.min(TOTAL_SEGMENTS - 1, Math.floor(barPeaks[i]));
+      const peakY = bottomY - (peakIdx + 1) * (segmentH + segmentGap);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(x, peakY, barW, segmentH);
+    }
+  }
+
+  // خط الأساس الكلاسيكي السفلي الحاد الرفيع كسن الإبرة (Needle-sharp baseline)
+  ctx.save();
+  ctx.strokeStyle = '#00ff88';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(startX - 2, bottomY + 2);
+  ctx.lineTo(startX + NUM_BARS * (barW + barGap) - barGap + 2, bottomY + 2);
+  ctx.stroke();
+  ctx.restore();
+}
+
+// ضبط أبعاد الكانفاس بدقة
+function resizeVisualizers() {
+  const vCanvas = document.getElementById('visualizer');
+  if (vCanvas) {
+    const rect = vCanvas.getBoundingClientRect();
+    vCanvas.width = rect.width;
+    vCanvas.height = rect.height;
+  }
+}
+window.addEventListener('resize', resizeVisualizers);
+
+// تهيئة نظام الصوت
+function initAudio() {
+  if (!audioContext) {
+    try {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.82;
+      
+      sourceNode = audioContext.createMediaElementSource(audio);
+      sourceNode.connect(analyser);
+      analyser.connect(audioContext.destination);
+    } catch(e) {
+      console.warn('Audio Context Note:', e);
+    }
+  } else if (audioContext.state === 'suspended') {
+    audioContext.resume();
+  }
+}
+
+// ========== تشغيل وتوقف المقاطع ==========
+function playAudio() {
+  initAudio();
+  audio.play().then(() => {
+    isPlaying = true;
+    const playBtn = document.getElementById('play-btn');
+    playBtn.textContent = '❚❚ PAUSE';
+    playBtn.classList.remove('pulsing');
+    updatePlaylist();
+  }).catch(err => {
+    console.warn('Playback error:', err);
+    isPlaying = false;
+    const playBtn = document.getElementById('play-btn');
+    playBtn.textContent = '▶ PLAY';
+    playBtn.classList.add('pulsing');
+    showNotification('Click Play to start audio', 'info');
+  });
+}
+
+function pauseAudio() {
+  audio.pause();
+  isPlaying = false;
+  const playBtn = document.getElementById('play-btn');
+  playBtn.textContent = '▶ PLAY';
+  playBtn.classList.add('pulsing');
+  updatePlaylist();
+}
+
+function togglePlay() {
+  if (isPlaying) {
+    pauseAudio();
+  } else {
+    playAudio();
+  }
+}
+
+function loadTrack(index) {
+  if (index < 0 || index >= tracks.length) return;
+  currentTrackIndex = index;
+  audio.src = tracks[currentTrackIndex].url;
+
+  // تحديث العنوان وأيقونة الموسيقى (غير قابلة للنقر)
+  const titleContainer = document.getElementById('track-title');
+  titleContainer.innerHTML = '';
+  titleContainer.appendChild(document.createTextNode(tracks[currentTrackIndex].title + ' '));
+  
+  const musicBadge = document.createElement('span');
+  musicBadge.className = 'track-music-badge';
+  musicBadge.id = 'track-music-badge';
+  musicBadge.textContent = '♪';
+  titleContainer.appendChild(musicBadge);
+
+  // إعادة ضبط التوقيت والشريط
+  document.getElementById('progress').style.width = '0%';
+  document.getElementById('time-display').textContent = '00:00 / 00:00';
+
+  audio.load();
+  updatePlaylist();
+
+  if (isPlaying) {
+    playAudio();
+  }
+}
+
+function nextTrack() {
+  currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+  loadTrack(currentTrackIndex);
+  if (isPlaying) playAudio();
+  showNotification(`Next: ${tracks[currentTrackIndex].title}`, 'info');
+}
+
+function prevTrack() {
+  if (audio.currentTime > 3) {
+    audio.currentTime = 0;
+  } else {
+    currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
+    loadTrack(currentTrackIndex);
+    if (isPlaying) playAudio();
+  }
+  showNotification(`Track: ${tracks[currentTrackIndex].title}`, 'info');
+}
+
+// تنسيق الوقت (ثواني -> دقيقة:ثانية)
+function formatTime(sec) {
+  if (isNaN(sec) || sec <= 0) return '00:00';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+// تحديث شريط التقدم
+audio.addEventListener('timeupdate', () => {
+  if (!isDraggingProgress && audio.duration) {
+    const percent = (audio.currentTime / audio.duration) * 100;
+    document.getElementById('progress').style.width = `${percent}%`;
+    document.getElementById('time-display').textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+  }
+});
+
+audio.addEventListener('loadedmetadata', () => {
+  document.getElementById('time-display').textContent = `00:00 / ${formatTime(audio.duration)}`;
+});
+
+audio.addEventListener('ended', () => {
+  nextTrack();
+  setTimeout(() => playAudio(), 100);
+});
+
+audio.addEventListener('error', () => {
+  showNotification('Could not stream audio track', 'error');
+});
+
+// السحب والنقر على شريط التقدم
+const progressContainer = document.getElementById('progress-container');
+function seekAudio(e) {
+  if (!audio.duration) return;
+  const rect = progressContainer.getBoundingClientRect();
+  const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  audio.currentTime = percent * audio.duration;
+  document.getElementById('progress').style.width = `${percent * 100}%`;
+  document.getElementById('time-display').textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+}
+
+progressContainer.addEventListener('click', seekAudio);
+progressContainer.addEventListener('mousedown', () => { isDraggingProgress = true; });
+document.addEventListener('mousemove', (e) => {
+  if (isDraggingProgress) seekAudio(e);
+});
+document.addEventListener('mouseup', () => { isDraggingProgress = false; });
+
+// التحكم في مستوى الصوت
+const volumeSlider = document.getElementById('volume-slider');
+const volumeText = document.getElementById('volume');
+const volLabel = document.getElementById('vol-label');
+
+function updateVolume(val) {
+  const v = val / 100;
+  audio.volume = v;
+  volumeSlider.value = val;
+  volumeText.textContent = `${val}%`;
+  if (val > 0) isMuted = false;
+}
+
+volumeSlider.addEventListener('input', (e) => {
+  updateVolume(e.target.value);
+});
+
+volLabel.addEventListener('click', () => {
+  if (isMuted || audio.volume === 0) {
+    isMuted = false;
+    updateVolume(previousVolume || 80);
+    showNotification('Audio Unmuted', 'info');
+  } else {
+    previousVolume = volumeSlider.value;
+    isMuted = true;
+    updateVolume(0);
+    showNotification('Audio Muted', 'info');
+  }
+});
+
+// تحديث قائمة التشغيل
+function initializePlaylist() {
+  const listEl = document.getElementById('playlist-items');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+  document.getElementById('tracks-count').textContent = tracks.length;
+
+  tracks.forEach((track, idx) => {
+    const item = document.createElement('div');
+    item.className = `playlist-item ${idx === currentTrackIndex ? 'active' : ''}`;
+    item.textContent = track.title;
+    item.addEventListener('click', () => {
+      loadTrack(idx);
+      playAudio();
+      showNotification(`Playing: ${track.title}`, 'success');
+    });
+    listEl.appendChild(item);
+  });
+}
+
+function updatePlaylist() {
+  document.querySelectorAll('.playlist-item').forEach((item, idx) => {
+    item.classList.toggle('active', idx === currentTrackIndex);
+  });
+}
+
+// أزرار قائمة التشغيل
+document.getElementById('playlist-prev').addEventListener('click', () => {
+  document.getElementById('playlist-items').scrollBy({ top: -45, behavior: 'smooth' });
+});
+document.getElementById('playlist-next').addEventListener('click', () => {
+  document.getElementById('playlist-items').scrollBy({ top: 45, behavior: 'smooth' });
+});
+
+// أزرار التحكم الرئيسية
+document.querySelectorAll('[data-action]').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    const action = e.currentTarget.dataset.action;
+    if (action === 'play') togglePlay();
+    else if (action === 'prev') prevTrack();
+    else if (action === 'next') nextTrack();
+  });
+});
+
+// اختصارات لوحة المفاتيح
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  switch(e.code) {
+    case 'Space':
+      e.preventDefault();
+      togglePlay();
+      break;
+    case 'ArrowRight':
+      nextTrack();
+      break;
+    case 'ArrowLeft':
+      prevTrack();
+      break;
+    case 'ArrowUp':
+      e.preventDefault();
+      updateVolume(Math.min(100, parseInt(volumeSlider.value) + 5));
+      break;
+    case 'ArrowDown':
+      e.preventDefault();
+      updateVolume(Math.max(0, parseInt(volumeSlider.value) - 5));
+      break;
+    case 'KeyM':
+      volLabel.click();
+      break;
+  }
+});
+
+// ========== خلفية ريترو حادة وعصرية بدون أي توهج (Zero Glow Sharp Horizon Grid) ==========
+function setupRetroBackground() {
+  const canvas = document.getElementById('retroCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  let w = 0, h = 0;
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // جزيئات دقيقة حادة جداً كسن الإبرة
+  const particleCount = 26;
+  const particles = [];
+  for (let i = 0; i < particleCount; i++) {
+    particles.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      size: 1.2,
+      speedX: (Math.random() - 0.5) * 0.18,
+      speedY: -Math.random() * 0.25 - 0.06,
+      alpha: Math.random() * 0.35 + 0.15
+    });
+  }
+
+  let gridOffset = 0;
+
+  function renderRetroBg() {
+    requestAnimationFrame(renderRetroBg);
+    ctx.clearRect(0, 0, w, h);
+
+    const centerX = w / 2;
+    const horizonY = h * 0.72;
+
+    // 1. شبكة الأفق والمنظور الريترو الحادة والرفيعة كسن الإبرة (بدون أي توهج)
+    ctx.save();
+
+    // خطوط المنظور المائلة الدقيقة
+    const vanishLines = 18;
+    for (let i = -vanishLines / 2; i <= vanishLines / 2; i++) {
+      const bottomX = centerX + i * (w / 8.5);
+      ctx.strokeStyle = 'rgba(0, 255, 136, 0.045)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(centerX + (i * 10), horizonY);
+      ctx.lineTo(bottomX, h);
+      ctx.stroke();
+    }
+
+    // خطوط الأفق العرضية المتباعدة انسيابياً
+    gridOffset = (gridOffset + 0.18) % 18;
+    for (let step = 0; step < 9; step++) {
+      const normalizedY = Math.pow((step + gridOffset / 18) / 9, 2.3);
+      const y = horizonY + normalizedY * (h - horizonY);
+      if (y <= h) {
+        const lineAlpha = 0.012 + normalizedY * 0.055;
+        ctx.strokeStyle = `rgba(0, 255, 136, ${lineAlpha})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+
+    // 2. ذرات دقيقة جداً ومحددة بحواف حادة بدون أي shadow أو blur
+    ctx.save();
+    for (let p of particles) {
+      p.x += p.speedX;
+      p.y += p.speedY;
+
+      if (p.y < 0) {
+        p.y = h + 10;
+        p.x = Math.random() * w;
+      }
+      if (p.x < 0) p.x = w;
+      if (p.x > w) p.x = 0;
+
+      ctx.fillStyle = `rgba(0, 255, 136, ${p.alpha})`;
+      ctx.fillRect(p.x, p.y, p.size, p.size);
+    }
+    ctx.restore();
+  }
+
+  renderRetroBg();
+}
+
+// الساعة والتاريخ
+function updateDateTime() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+  const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const dateEl = document.getElementById('current-date');
+  const timeEl = document.getElementById('current-time');
+  if (dateEl) dateEl.textContent = dateStr;
+  if (timeEl) timeEl.textContent = timeStr;
+}
+
+// تشغيل التطبيق
+window.addEventListener('load', () => {
+  setupRetroBackground();
+  resizeVisualizers();
+  
+  initializePlaylist();
+  loadTrack(0);
+  
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
+
+  // إطلاق رسم معادل الصوت الرقمي النيون
+  drawRetroVisualizer();
+  showNotification('NEON PLAYER READY', 'success');
+});
+</script>
+</body>
+</html>
